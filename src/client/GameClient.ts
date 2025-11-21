@@ -195,8 +195,15 @@ export class GameClient {
     // Prompt for new game or quit
     this.rl.question('\nPlay again? (yes/no): ', (answer) => {
       if (answer.toLowerCase() === 'yes' || answer.toLowerCase() === 'y') {
-        Display.showInfo('Starting new game...');
-        this.joinGame('Player');
+        // Prompt for player name
+        const playerName = new Promise<string>((resolve) => {
+          this.rl.question('\nEnter your name: ', (answer) => {
+            resolve(answer.trim() || 'Player');
+          });
+        }).then((playerName) => {
+          Display.showInfo('Starting new game...');
+          this.joinGame(playerName);
+        })
       } else {
         this.disconnect();
       }

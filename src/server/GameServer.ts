@@ -119,6 +119,7 @@ export class GameServer {
       
       const game = this.games.get(data.gameId);
       if (game) {
+        this.pendingGame = null;
         // Add partner's player to the game
         const partnerPlayer: Player = {
           id: data.playerId,
