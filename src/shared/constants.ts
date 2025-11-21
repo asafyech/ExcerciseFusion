@@ -28,6 +28,7 @@ export enum MessageType {
   
   // Server -> Client
   GAME_JOINED = 'GAME_JOINED',
+  PLAYER_LEFT = 'PLAYER_LEFT',
   GAME_STATE = 'GAME_STATE',
   MOVE_ACCEPTED = 'MOVE_ACCEPTED',
   MOVE_REJECTED = 'MOVE_REJECTED',
@@ -40,6 +41,7 @@ export enum MessageType {
 export enum FederationMessageType {
   PLAYER_WAITING = 'PLAYER_WAITING',      // Server notifies it has a waiting player
   PLAYER_JOINED = 'PLAYER_JOINED',        // Partner server acknowledges and starts game
+  PLAYER_LEFT = 'PLAYER_LEFT',            // Partner server notifies that a local player disconnected
   MOVE_MADE = 'MOVE_MADE',                // Server broadcasts move to partner
   GAME_ENDED = 'GAME_ENDED'               // Game finished notification
 }

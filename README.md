@@ -466,5 +466,6 @@ This version of the project worked, except for a few problems:
 3. In the same function, Claude didn't define the type for the player's symbol it got form the other server
 4. When you start a new game, Claude send a "join game" message to the server with a hardcoded name "Player" (instead of the original name)
 5. When the player who entered his server first wants to play again before the player who joined later - the game won't start. this was due to the fact that claude didn't nulled the field "pending" on the first player's server when the second player joined it, and so the first server would think that it still has a pending game and instead of creating a new game - it would just notify the other server that it joined (to an already-over game)
+6. When one player disconnects, the other player still waits to their turn nad there's nothing they can do to quit.
 
 So once I fixed those issues, it seems like the game works perfectly

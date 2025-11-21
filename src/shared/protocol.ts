@@ -37,6 +37,12 @@ export interface GameStateMessage extends BaseMessage {
   yourSymbol: 'X' | 'O';
 }
 
+export interface PlayerLeftMessage extends BaseMessage {
+  type: MessageType.PLAYER_LEFT;
+  gameId: string;
+  playerSocketId: WebSocket;
+}
+
 export interface MoveAcceptedMessage extends BaseMessage {
   type: MessageType.MOVE_ACCEPTED;
   gameId: string;
@@ -79,6 +85,7 @@ export type ClientMessage = JoinGameMessage | MakeMoveMessage;
 // Union type for all server messages
 export type ServerMessage =
   | GameJoinedMessage
+  | PlayerLeftMessage
   | GameStateMessage
   | MoveAcceptedMessage
   | MoveRejectedMessage

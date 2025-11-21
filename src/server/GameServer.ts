@@ -12,7 +12,8 @@ import {
   MoveRejectedMessage,
   OpponentMoveMessage,
   GameOverMessage,
-  ErrorMessage
+  ErrorMessage,
+  PlayerLeftMessage
 } from '../shared/protocol';
 import { GameState, SERVER_A_ID } from '../shared/constants';
 import { MessageType } from '../shared/constants';
@@ -120,6 +121,7 @@ export class GameServer {
       const game = this.games.get(data.gameId);
       if (game) {
         this.pendingGame = null;
+        game.state = GameState.PLAYING;
         // Add partner's player to the game
         const partnerPlayer: Player = {
           id: data.playerId,
@@ -404,10 +406,14 @@ export class GameServer {
   private handleGameOver(
     game: Game,
     winner: 'X' | 'O' | 'DRAW',
-    winningLine?: { row: number; col: number }[]
+    winningLine?: { row: number; col: number }[],
+    technical = false
   ): void {
-    console.log(`[Server ${this.serverId}] 🏁 Game ${game.id} ended - Winner: ${winner}`);
-
+    if (technical) {
+      console.log(`[Server ${this.serverId}] ⚠️  Game ${game.id} ended due to disconnection`);
+    } else {
+      console.log(`[Server ${this.serverId}] 🏁 Game ${game.id} ended - Winner: ${winner}`);
+    }
     game.state = GameState.FINISHED;
     game.winner = winner;
     game.winningLine = winningLine;
@@ -458,12 +464,20 @@ export class GameServer {
     if (connection) {
       console.log(`[Server ${this.serverId}] 👋 Client disconnected: ${connection.playerId || 'unknown'}`);
       
-      // Clean up pending game if this was the only player
-      if (connection.gameId && this.pendingGame === connection.gameId) {
+      // Clean up pending game if this was the only player waiting
+      // Or notify partner server if game was in progress
+      if (connection.gameId) {
         const game = this.games.get(connection.gameId);
-        if (game && game.state === GameState.WAITING) {
+        if (game && game.state === GameState.WAITING && this.pendingGame === connection.gameId) {
           this.games.delete(connection.gameId);
           this.pendingGame = null;
+          console.log(`[Server ${this.serverId}] 🗑️  Removed pending game ${connection.gameId}`);
+        }
+        if (game && game.state === GameState.PLAYING) {
+          this.games.delete(connection.gameId);
+          console.log(`[Server ${this.serverId}] 🗑️  Removed concurrent game ${connection.gameId}`);
+          // Notify partner server that local player disconnected 
+          this.handleGameOver(game, game.players.X?.id === connection.playerId ? 'O' : 'X', [], true);
         }
       }
       
